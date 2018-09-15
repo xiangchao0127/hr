@@ -1,0 +1,5 @@
+# Created by .ignore support plugin (hsz.mobi)
+target/classes/application.yml
+target/generated-sources/
+/.idea/
+*.iml

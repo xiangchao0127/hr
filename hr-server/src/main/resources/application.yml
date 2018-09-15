@@ -1,0 +1,13 @@
+spring:
+   profiles:
+       active: dev
+---
+spring:
+   profiles: dev
+server:
+   port: 9090
+---
+spring:
+   profiles: demo
+server:
+   port: 9091

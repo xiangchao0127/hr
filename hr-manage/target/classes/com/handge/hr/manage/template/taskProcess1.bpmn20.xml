@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://www.activiti.org/processdef">
+  <signal id="取消流程" name="取消流程"/>
+  <signal id="触发qc分配" name="触发qc分配"/>
+  <process id="taskProcess1" name="taskProcess1" isExecutable="true">
+    <startEvent id="startEvent1"/>
+    <userTask id="分配任务" name="01" activiti:assignee="${userID}"/>
+    <sequenceFlow id="sid-BE8BBAFE-808D-4906-B1B8-F28D84755009" sourceRef="startEvent1" targetRef="分配任务"/>
+    <userTask id="确认接收" name="02" activiti:assignee="${receiverID}"/>
+    <userTask id="完成任务" name="03" activiti:assignee="${receiverID}"/>
+    <userTask id="QC分配" name="04" activiti:assignee="${QCID}"/>
+    <sequenceFlow id="sid-6ECBD8BB-DB79-4A2B-B148-9B23E00A43ED" sourceRef="确认接收" targetRef="完成任务"/>
+    <exclusiveGateway id="sid-E12E224D-C131-4BA7-9CD3-5373F91A2EA7"/>
+    <sequenceFlow id="sid-C8835E0B-8E8F-4275-ACF2-D8A040CD0DFE" sourceRef="QC分配"
+                  targetRef="sid-52288629-EA4D-423A-8816-21A129A6E01B"/>
+    <exclusiveGateway id="sid-9011C2E3-FD7A-4A3D-9DBC-B8738E7B6462"/>
+    <userTask id="任务评价" name="05" activiti:assignee="${userID}"/>
+    <userTask id="QC评价" name="04" activiti:assignee="${qcID}"/>
+    <sequenceFlow id="sid-BF97CD71-D573-4CE4-AFDD-DB70B04CF634" sourceRef="QC评价"
+                  targetRef="sid-9011C2E3-FD7A-4A3D-9DBC-B8738E7B6462"/>
+    <endEvent id="sid-C4F77DD1-4C44-409C-8A58-23239D77F112"/>
+    <sequenceFlow id="否" name="否" sourceRef="sid-9011C2E3-FD7A-4A3D-9DBC-B8738E7B6462" targetRef="完成任务">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${isPassed == 0}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="是" name="是" sourceRef="sid-9011C2E3-FD7A-4A3D-9DBC-B8738E7B6462" targetRef="任务评价">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${isPassed == 1}]]></conditionExpression>
+    </sequenceFlow>
+    <parallelGateway id="sid-52288629-EA4D-423A-8816-21A129A6E01B"/>
+    <sequenceFlow id="无QC且已完成" name="无QC且已完成" sourceRef="sid-E12E224D-C131-4BA7-9CD3-5373F91A2EA7" targetRef="任务评价">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${hasQC == 0 && isFinished == 1}]]></conditionExpression>
+    </sequenceFlow>
+    <exclusiveGateway id="sid-3CFF7A87-F1AF-4C3D-94A9-64BB85B74A47"/>
+    <sequenceFlow id="sid-4E31E0AB-2A0D-409C-B233-3D0C53349B32" sourceRef="完成任务"
+                  targetRef="sid-3CFF7A87-F1AF-4C3D-94A9-64BB85B74A47"/>
+    <sequenceFlow id="sid-2FB30C7E-78CA-4FF8-B475-174639049966" sourceRef="sid-52288629-EA4D-423A-8816-21A129A6E01B"
+                  targetRef="sid-E12E224D-C131-4BA7-9CD3-5373F91A2EA7"/>
+    <sequenceFlow id="有QC且已完成" name="有QC且已完成" sourceRef="sid-E12E224D-C131-4BA7-9CD3-5373F91A2EA7" targetRef="QC评价">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${hasQC == 1 && isFinished == 1}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="sid-66CE36E7-CF9D-4AC9-BCD0-81605ED6EC9E" name="是第一次" sourceRef="sid-3CFF7A87-F1AF-4C3D-94A9-64BB85B74A47" targetRef="sid-52288629-EA4D-423A-8816-21A129A6E01B">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${isFirst == 1}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="sid-005E5B01-AA41-4A5F-97B5-5D5A43E941AC" name="不是第一次" sourceRef="sid-3CFF7A87-F1AF-4C3D-94A9-64BB85B74A47" targetRef="sid-E12E224D-C131-4BA7-9CD3-5373F91A2EA7">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${isFirst ==  0}]]></conditionExpression>
+    </sequenceFlow>
+    <endEvent id="sid-89CDAC89-875A-4553-9FB0-DF389C525AA2"/>
+    <sequenceFlow id="sid-CFBD92C8-752F-4979-A772-4097DB2F5A50" sourceRef="分配任务" targetRef="确认接收"/>
+    <sequenceFlow id="sid-4D6FD626-9F21-42E8-B31E-8A5057D1C29A" sourceRef="任务评价"
+                  targetRef="sid-C4F77DD1-4C44-409C-8A58-23239D77F112"/>
+    <boundaryEvent id="sid-C1FAD04B-BBF1-4BFC-89D5-A73EEA51B52F" attachedToRef="确认接收" cancelActivity="true" name="06">
+      <signalEventDefinition signalRef="取消流程"/>
+    </boundaryEvent>
+    <sequenceFlow id="sid-02B5807C-06A0-42D2-8FBB-DFB7D8CCE8DA" sourceRef="sid-C32348EB-A871-42A2-8F7D-58866ADE760C"
+                  targetRef="sid-228E0229-EB9B-4DCE-913D-F8CE522C1BF8"/>
+    <endEvent id="sid-228E0229-EB9B-4DCE-913D-F8CE522C1BF8"/>
+    <endEvent id="sid-1ABEF8F7-CAD0-4784-8063-9EE0E032613C"/>
+    <boundaryEvent id="sid-CAD3D6D9-C3A5-44DD-AC19-C710BEFF56CB" attachedToRef="QC评价" cancelActivity="true" name="06">
+      <signalEventDefinition signalRef="取消流程"/>
+    </boundaryEvent>
+    <boundaryEvent id="sid-C32348EB-A871-42A2-8F7D-58866ADE760C" attachedToRef="QC分配" cancelActivity="true" name="06">
+      <signalEventDefinition signalRef="取消流程"/>
+    </boundaryEvent>
+    <endEvent id="sid-4E3E469C-6BC6-457F-B06F-38F9752E746C"/>
+    <boundaryEvent id="sid-DCFCA77B-3487-4F0D-8482-1DC64FCD6879" attachedToRef="完成任务" cancelActivity="true" name="06">
+      <signalEventDefinition signalRef="取消流程"/>
+    </boundaryEvent>
+    <intermediateCatchEvent id="sid-EFC271E9-A3A4-4422-A2DD-26C78B87B917">
+      <signalEventDefinition signalRef="触发qc分配"/>
+    </intermediateCatchEvent>
+    <sequenceFlow id="sid-86178D7A-AE19-4C26-9642-09759318F9A3" sourceRef="确认接收" targetRef="sid-EFC271E9-A3A4-4422-A2DD-26C78B87B917"/>
+    <sequenceFlow id="sid-5A1D8000-9B46-43FE-B5F9-EDAC0DF27FE9" sourceRef="sid-EFC271E9-A3A4-4422-A2DD-26C78B87B917" targetRef="QC分配"/>
+    <sequenceFlow id="sid-E223F7FD-E196-489F-9B9F-50FB208241BD" sourceRef="sid-C1FAD04B-BBF1-4BFC-89D5-A73EEA51B52F"
+                  targetRef="sid-89CDAC89-875A-4553-9FB0-DF389C525AA2"/>
+    <sequenceFlow id="sid-0478E790-A928-4CF8-960E-E620C9C86AFA" sourceRef="sid-DCFCA77B-3487-4F0D-8482-1DC64FCD6879"
+                  targetRef="sid-4E3E469C-6BC6-457F-B06F-38F9752E746C"/>
+    <sequenceFlow id="sid-834AA542-8008-4431-B05D-2F66CE9D7A51" sourceRef="sid-CAD3D6D9-C3A5-44DD-AC19-C710BEFF56CB"
+                  targetRef="sid-1ABEF8F7-CAD0-4784-8063-9EE0E032613C"/>
+    <textAnnotation id="sid-B5B5159B-191C-43D8-B31B-BFD5F4FABA25">
+      <text>是否有QC</text>
+    </textAnnotation>
+    <association id="sid-27D17A05-C0BD-430D-AA04-91F575982F92" sourceRef="sid-E12E224D-C131-4BA7-9CD3-5373F91A2EA7"
+                 targetRef="sid-B5B5159B-191C-43D8-B31B-BFD5F4FABA25" associationDirection="None"/>
+    <textAnnotation id="sid-A753706E-7B7A-4415-9406-05EF608C0C66">
+      <text>是否通过</text>
+    </textAnnotation>
+    <association id="sid-AC2249D8-D1CC-4B10-A774-AB77DDA73189" sourceRef="sid-9011C2E3-FD7A-4A3D-9DBC-B8738E7B6462"
+                 targetRef="sid-A753706E-7B7A-4415-9406-05EF608C0C66" associationDirection="None"/>
+  </process>
+</definitions>
