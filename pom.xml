@@ -20,19 +20,9 @@
     </modules>
 
 
+<!-- 测试merge -->
 
 
-
-
-
-
-
-
-
-
-
-
-    
 
 
 
@@ -85,6 +75,9 @@
             <!--<artifactId>spring-boot-starter-actuator</artifactId>-->
             <!--<version>${springboot.version}</version>-->
         <!--</dependency>-->
+
+
+
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
